@@ -1,15 +1,33 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
+import { Route } from "react-router-dom";
+import Index from "./container/Index";
+import About from "./container/About";
+import User from "./container/User";
 
-function App(props) {
-  const [count, setCount] = useState(1)
-  return (
-    <div>
-      <h1>
-        Hello,{props.title} {count}号技师为您服务
-      </h1>
-      <button onClick={() => setCount(count + 1)}>点我试试</button>
-    </div>
-  )
-}
+// export default (
+//   <div>
+//     <Route path="/" exact component={ Index }></Route>
+//     <Route path="/about" exact component={ About }></Route>
+//   </div>
+// );
 
-export default <App title="4号美女顾客"></App>;
+export default [
+  {
+    path: "/",
+    component: Index,
+    exact: true,
+    key: "index"
+  },
+  {
+    path: "/about",
+    component: About,
+    exact: true,
+    key: "about"
+  },
+  {
+    path: "/user",
+    component: User,
+    exact: true,
+    key: "user"
+  }
+];
