@@ -82,19 +82,6 @@ router.get("*", async ctx => {
       });
     })
   );
-  // 设置api反向代理
-  if (ctx.url.startsWith("/api")) {
-    // console.log('ctx.url', ctx.url);
-    const { method, url } = ctx;
-    const baseUrl = "http://localhost:9093";
-
-    const res = await axios({
-      method,
-      url: `${baseUrl}${url}`
-    });
-
-    return (ctx.body = res.data);
-  }
   const content = renderToString(
     <Provider store={store}>
       <StaticRouter location={ctx.request.url}>
