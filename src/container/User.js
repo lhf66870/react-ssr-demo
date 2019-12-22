@@ -4,11 +4,11 @@ import { getUserInfo } from "../store/user";
 import { Redirect } from "react-router-dom";
 
 function User(props) {
-  useEffect(() => {
-    if (!props.userInfo.name) {
-      props.getUserInfo();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!props.userInfo.name) {
+  //     props.getUserInfo();
+  //   }
+  // }, []);
   return <Redirect to="/about"></Redirect>;
   // return (
   //   <div>

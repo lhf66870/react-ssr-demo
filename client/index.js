@@ -21,4 +21,5 @@ const Page = (
   </Provider>
 );
 
-ReactDom.hydrate(Page, document.getElementById("root"));
+if (window.__context) ReactDom.hydrate(Page, document.getElementById("root"));
+ReactDom.render(Page, document.getElementById("root"));

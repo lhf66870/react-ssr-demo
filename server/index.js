@@ -1,10 +1,11 @@
 // 此处的代码 会用babel处理
 import React from "react";
 import axios from "axios";
-import path from "path";
 import Koa from "koa";
 import Router from "koa-router";
 import Static from "koa-static";
+import path from "path";
+import fs from "fs";
 import { renderToString } from "react-dom/server";
 import httpProxy from "http-proxy-middleware";
 import k2c from "koa2-connect";
@@ -53,17 +54,18 @@ router.get("/api/*", async (ctx, next) => {
   ctx.body = data;
 });
 
+function csrRender(res) {
+  // 读取 csr 文件 返回
+  const filename = path.resolve(process.cwd(), "public/index.csr.html");
+  const html = fs.readFileSync(filename, "utf-8");
+  return (res.body = html);
+}
+
 router.get("*", async ctx => {
-  // 匹配以 /api 开头的地址通过 axios拼接地址后重新发送
-  // if (ctx.url.startsWith("/api")) {
-  //   const baseURL = "http://localhost:9090";
-  //   const res = await axios({
-  //     method: ctx.method,
-  //     url: `${baseURL}${ctx.url}`
-  //   });
-  //   return (ctx.body = res.data);
-  // }
-  // 存储网络请求
+  if (ctx.request.query._mode === "csr") {
+    console.log("url参数开启csr降级");
+    return csrRender(ctx.response);
+  }
   const promises = [];
   routes.some(route => {
     const match = matchPath(ctx.path, route);
@@ -82,20 +84,22 @@ router.get("*", async ctx => {
       });
     })
   );
-  const context = {};
+  const context = {
+    css: []
+  };
   const content = renderToString(
     <Provider store={store}>
       <StaticRouter location={ctx.request.url} context={context}>
         <Header></Header>
         <Switch>
           {routes.map(route => (
-            <Route {...route}></Route>
+            <Route {...route} key={route}></Route>
           ))}
         </Switch>
       </StaticRouter>
     </Provider>
   );
-  console.log("context", context);
+  // console.log("context", context);
   if (context.statusCode) {
     // 状态切换 / 页面跳转
     ctx.status = context.statusCode;
@@ -105,12 +109,16 @@ router.get("*", async ctx => {
     ctx.status = 301;
     ctx.redirect(context.url);
   }
+  const css = context.css.join("\n");
   ctx.body = `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8">
           <title>react-ssr-demo</title>
+          <style>
+            ${css}
+          </style>
         </head>
           <body>
             <div id="root">${content}</div>
