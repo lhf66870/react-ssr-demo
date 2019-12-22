@@ -9,7 +9,7 @@ import { renderToString } from "react-dom/server";
 import httpProxy from "http-proxy-middleware";
 import k2c from "koa2-connect";
 import bodyparser from "koa-bodyparser";
-import { StaticRouter, matchPath, Route } from "react-router-dom";
+import { StaticRouter, matchPath, Route, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 import routes from "../src/App";
 import { getServerStore } from "../src/Store/store";
@@ -82,16 +82,29 @@ router.get("*", async ctx => {
       });
     })
   );
+  const context = {};
   const content = renderToString(
     <Provider store={store}>
-      <StaticRouter location={ctx.request.url}>
+      <StaticRouter location={ctx.request.url} context={context}>
         <Header></Header>
-        {routes.map(route => (
-          <Route {...route}></Route>
-        ))}
+        <Switch>
+          {routes.map(route => (
+            <Route {...route}></Route>
+          ))}
+        </Switch>
       </StaticRouter>
     </Provider>
   );
+  console.log("context", context);
+  if (context.statusCode) {
+    // 状态切换 / 页面跳转
+    ctx.status = context.statusCode;
+  }
+  if (context.action === "REPLACE") {
+    // 状态切换 / 页面跳转
+    ctx.status = 301;
+    ctx.redirect(context.url);
+  }
   ctx.body = `
       <!DOCTYPE html>
       <html lang="en">

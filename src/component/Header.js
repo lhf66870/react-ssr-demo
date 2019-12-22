@@ -9,6 +9,8 @@ export default () => {
       <Link to="/about">关于</Link>
       =|=
       <Link to="/user">用户</Link>
+      =|=
+      <Link to="/notfound">404</Link>
     </div>
   );
 };
